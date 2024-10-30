@@ -8,7 +8,7 @@ router.route("/register").post(singleUpload,register);
 router.route("/logout").get(logout)
 router.route("/login").post(login);
 
-router.route("/profile/update").post(isAuthenticated,updateProfile);
+router.route("/profile/update").post(isAuthenticated,singleUpload,updateProfile);
 // router.route("/register").post(log);
 
 export default router

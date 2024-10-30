@@ -1,6 +1,8 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import getDataUri from "../utils/datauri.js";
+import cloudinary from "../utils/cloudinary.js";
 
 export const register = async(req,res)=>{
     try {
@@ -13,6 +15,24 @@ export const register = async(req,res)=>{
             })
         }      
         //57.16
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // Added regex for email validation
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                message: "Invalid email format",  // Added message for invalid email
+                success: false
+            });
+        }
+
+        const file = req.file;
+        if (!file) {  // Added check for missing file
+            return res.status(400).json({
+                message: "Profile photo is required.",  // Error message for missing file
+                success: false
+            });
+        }
+        const fileUri = getDataUri(file);
+        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+
         const user = await User.findOne({email});
         if(user){
             return res.status(400).json({
@@ -28,6 +48,9 @@ export const register = async(req,res)=>{
             phoneNumber,
             password:hashedPassword,
             role,
+            profile:{
+                profilePhoto:cloudResponse.secure_url
+            }
             
 
         })
@@ -37,6 +60,10 @@ export const register = async(req,res)=>{
         })
     } catch (error) {
         console.log(error)
+        return res.status(500).json({  // Added response for server error
+            message: "Internal Server Error",
+            success: false
+        });
         
     }
 }
@@ -71,7 +98,7 @@ export const login = async (req,res)=>{
             })
         }
         //check role is correct or not
-        if(role!=user.role){
+        if(role !== user.role){
             return res.status(400).json({
                 message:"Account doesn't exist with current role .",
                 success:false
@@ -128,7 +155,13 @@ export const logout = async(req,res)=>{
 export const updateProfile = async (req,res)=>{
     try {
         const {fullname,email,phoneNumber,bio ,skills}=req.body;
+
+        
+        
         const file = req.file
+        /// cloudinary setup 
+        const fileUri = getDataUri(file);
+        const cloudResponse = await cloudinary.uploader.upload(fileUri.content)
         // if(!fullname || !email || !phoneNumber || !bio || !skills){
         //     return res.status(400).json({
         //         message:"Something is missing ",
@@ -156,11 +189,15 @@ export const updateProfile = async (req,res)=>{
         if(email)user.email = email
         if(phoneNumber)user.phoneNumber = phoneNumber
         if(bio)user.profile.bio = bio
-        if(skills)user.profile.skills
+        if(skills)user.profile.skills=skillsArray
       
 
 
         // resume on hold 
+        if(cloudResponse){
+            user.profile.resume = cloudResponse.secure_url;
+            user.profile.resumeOriginalName=file.originalname 
+        }
 
         await user.save();
 

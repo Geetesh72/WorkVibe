@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { User } from "lucide-react";
+
+
 const authSlice = createSlice({
     name:"auth",
     initialState:{

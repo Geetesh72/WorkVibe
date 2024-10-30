@@ -151,8 +151,8 @@ function Signup() {
                                     type="radio"
                                     name="role"
 
-                                    value="Recruiter"
-                                    checked={input.role == 'Recruiter'}
+                                    value="recruiter"
+                                    checked={input.role == 'recruiter'}
                                     onChange={changeEventtHandler}
                                     className="cursor-pointer"
                                 />

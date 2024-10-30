@@ -10,21 +10,21 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setUser } from '@/redux/authSlice'
 import { toast } from 'sonner'
 import axios from 'axios'
-import { USER_API_END_POINT } from "../utils/constant.js"
+import { USER_API_END_POINT } from "@/utils/constant"
 
 
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);
     const { user } = useSelector(store => store.auth);
-    const [input, setInput] = useState({
-        fullname: user?.fullname,
-        email: user?.email,
-        phoneNumber: user?.phoneNumber,
-        bio: user?.profile?.bio,
-        skills: user?.profile?.skills?.map(skill => skill),
-        file: user?.profile?.resume
 
+    const [input, setInput] = useState({
+        fullname: user?.fullname || "",
+        email: user?.email || "",
+        phoneNumber: user?.phoneNumber || "",
+        bio: user?.profile?.bio || "",
+        skills: user?.profile?.skills?.map(skill => skill) || "",
+        file: user?.profile?.resume || ""
     });
     const dispatch = useDispatch();
 
@@ -54,6 +54,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
         }
         try {
+            setLoading(true)
             const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -70,6 +71,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
             toast.error(error.response.data.message);
 
 
+        }
+        finally {
+            setLoading(false);
         }
         setOpen(false);
         console.log(input);
@@ -89,7 +93,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                         <div className='grid gap-4 py-4'>
                             <div className='grid grid-cols-4 items-center gap-4'>
                                 <Label htmlFor="name " className="text-right">Name</Label>
-                                <Input id="name"
+                                <Input id="fullname"
                                     name="fullname"
                                     type="text"
                                     value={input.fullname}
@@ -110,8 +114,10 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                             </div>
                             <div className='grid grid-cols-4 items-center gap-4'>
                                 <Label htmlFor="number" className="text-right">Number</Label>
-                                <Input id="number"
+                                <Input id="phoneNumber"
                                     name="phoneNumber"
+                                    type="text"
+
                                     onChange={changeEventHandler}
                                     value={input.phoneNumber}
                                     className="col-span-3"
@@ -131,8 +137,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 <Label htmlFor="skills" className="text-right">Skills</Label>
                                 <Input id="skills"
                                     name="skills"
-                                    onChange={changeEventHandler}
                                     value={input.skills}
+                                    onChange={changeEventHandler}
 
                                     className="col-span-3"
                                 />
@@ -141,11 +147,11 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                             <div className='grid grid-cols-4 items-center gap-4'>
                                 <Label htmlFor="file" className="text-right">Resume</Label>
                                 <Input id="file"
-                                    namf e="file"
+                                    name="file"
                                     type="file"
-                                    value={input.file}
-                                    onChange={fileChangeHandler}
+
                                     accept="application/pdf"
+                                    onChange={fileChangeHandler}
                                     className="col-span-3"
                                 />
                             </div>
