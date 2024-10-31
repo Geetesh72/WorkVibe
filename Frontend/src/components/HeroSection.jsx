@@ -1,7 +1,21 @@
+import { setSearchedQuery } from '@/redux/jobSlice';
 import { Search } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 function HeroSection() {
+
+
+    const [query, setQuery] = useState("");
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const searchJobHandler = () => {
+        dispatch(setSearchedQuery(query));
+        navigate("/browse")
+
+    }
+
     return (
 
         <div className='text-center'>
@@ -13,10 +27,11 @@ function HeroSection() {
                     <input
                         type="text"
                         placeholder='Have you search on WorkVibe ???'
+                        onChange={(e) => setQuery(e.target.value)}
                         className='outline-none border-none w-full py-2 text-lg'
 
                     />
-                    <button className='rounded-r-full bg-[#6A38C2] py-3 px-4'>
+                    <button onClick={searchJobHandler} className='rounded-r-full bg-[#6A38C2] py-3 px-4'>
                         <Search className='h-5 w-5' />
                     </button>
                 </div>
